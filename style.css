@@ -129,6 +129,16 @@ sup a {
 }
 
 #chart-container {
+    font: 16px/18px Helvetica, Arial, sans-serif;
     width: 800px;
     margin: 0 auto;
-  }
+}
+
+#factor {
+    font: 16px/18px Helvetica, Arial, sans-serif;
+}
+
+#legend-line {
+    font: 16px/18px Helvetica, Arial, sans-serif;
+    width:100px; height:400px;
+}
