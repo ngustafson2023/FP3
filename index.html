@@ -173,6 +173,7 @@
                 <option value="age">Age</option> 
                 <option value="race">Race</option> 
                 <option value="education">Education</option> 
+                <option value="foreign-born">Foreign-born</option> 
             </select>
             </div>
             <div style="text-align: right;">
@@ -275,6 +276,7 @@
                 document.getElementById('viz-container').style.display = 'none';
                 document.getElementById('viz-title').style.display = 'none';
                 document.getElementById('stephen-container').style.display = 'block';
+                document.getElementById("factor").value = "age";
                 plotFactor("age")
             }
             function onEachFeature(feature, layer) {
@@ -364,7 +366,7 @@
         function plotFactor(factor) {
             d3.select("#chart-container").selectAll("*").remove();
             d3.select("#legend_line").selectAll("*").remove();
-            console.log("plot factor neigh", selectedNeighborhood)
+
             var select = document.getElementById("factor");
             var selectedLineFactor = select.options[select.selectedIndex].text;
             document.getElementById('line-title').innerHTML = `${selectedLineFactor} in ${selectedNeighborhood}`
@@ -377,31 +379,49 @@
                 factors = ["White","Black/ African American","Hispanic","Asian/PI","Other"]
             } else if (factor == "education") {
                 factors = ["less than High School", "High School or GED", "Some College or Associate's Degree", "Bachelor's Degree or Higher"]; // from dropdown to choose factor
+            } else if (factor == "foreign-born") {
+                factors = ["Foreign Born"]
             }
             
             d3.csv("./Boston_Neighborhood_Census_Data (2000, 2010, 2015, 2017, 2020) - extrapolated.csv").then(function(data) {
                 const selectedNeigh = data.filter(d => d.Neighborhood === selectedNeighborhood);
+                console.log(selectedNeigh)
                 const selectedValues = {}
-                var sumFactors = {}
-                selectedNeigh.forEach(d => {
-                    sumFactors[d["Year"]] = 0
-                    factors.forEach(column => {
-                    sumFactors[d["Year"]] += parseFloat(d[column]);
-                    });
-                });
-                selectedNeigh.forEach(d => {
-                    factors.forEach(column => {
+                if (factor == "foreign-born") {
+                    selectedNeigh.forEach(d => {
                         if (!selectedValues[d["Year"]]) {
                             selectedValues[d["Year"]] = {};
                         }
-                        selectedValues[d["Year"]][column] = 100*(d[column]/sumFactors[d["Year"]]);
-                    });
+                    selectedValues[d["Year"]] = 100*(d["Foreign Born"]/d["Population"]);
                 });
+                console.log("selected", selectedValues)
+                } else {
+
+                    var sumFactors = {}
+                    selectedNeigh.forEach(d => {
+                        sumFactors[d["Year"]] = 0
+                        factors.forEach(column => {
+                        sumFactors[d["Year"]] += parseFloat(d[column]);
+                        });
+                    });
+                    selectedNeigh.forEach(d => {
+                        factors.forEach(column => {
+                            if (!selectedValues[d["Year"]]) {
+                                selectedValues[d["Year"]] = {};
+                            }
+                        selectedValues[d["Year"]][column] = 100*(d[column]/sumFactors[d["Year"]]);
+                        });
+                    });
+                }
 
                 years = Object.keys(selectedValues)
-                factors.forEach(d => {
-                    factorPoints[d] = years.map(year => selectedValues[year][d])
-                })
+                if (factor == "foreign-born") {
+                    factorPoints[factors[0]] = years.map(year => selectedValues[year])
+                } else {
+                    factors.forEach(d => {
+                        factorPoints[d] = years.map(year => selectedValues[year][d])
+                    })
+                }
 
             const legend_svg = d3.select("#legend_line")
             const svg = d3.select("#chart-container")
