@@ -349,7 +349,7 @@
         .range([0, width]);
 
         const yScale = d3.scaleLinear()
-        .domain([0, 1])
+        .domain([0, 100])
         .range([height, 0]);
 
         const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
@@ -394,7 +394,7 @@
                         if (!selectedValues[d["Year"]]) {
                             selectedValues[d["Year"]] = {};
                         }
-                        selectedValues[d["Year"]][column] = d[column]/sumFactors[d["Year"]];
+                        selectedValues[d["Year"]][column] = 100*(d[column]/sumFactors[d["Year"]]);
                     });
                 });
 
@@ -430,7 +430,7 @@
                 .attr("dy", "0.71em")
                 .attr("text-anchor", "middle")
                 .attr("fill", "black")
-                .text("Percentage");
+                .text("Percentage of Total Population");
 
             for (let i = 0; i < factors.length; i++) {
                 const f = factors[i];
